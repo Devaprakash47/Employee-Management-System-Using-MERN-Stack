@@ -1,0 +1,385 @@
+/* App.css - Employee Management System */
+
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Welcome Page Styles */
+.welcome {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  position: relative;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Background Animation */
+.welcome::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  animation: backgroundShift 20s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes backgroundShift {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.welcome > * {
+  position: relative;
+  z-index: 1;
+}
+
+#welcome {
+  font-size: 4rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  animation: slideInDown 1s ease-out;
+  letter-spacing: 0.1em;
+}
+
+#EMS {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: #f0f8ff;
+  margin-bottom: 1rem;
+  animation: slideInDown 1s ease-out 0.3s both;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#devname {
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: #e6e6fa;
+  margin-bottom: 3rem;
+  font-style: italic;
+  animation: slideInDown 1s ease-out 0.6s both;
+  opacity: 0.9;
+}
+
+#Employee, #Admin {
+  background: linear-gradient(45deg, #ffffff, #f8f9fa);
+  color: #333;
+  border: none;
+  padding: 1rem 2.5rem;
+  margin: 0 1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+  min-width: 180px;
+  animation: slideInUp 1s ease-out 0.9s both;
+}
+
+#Employee::before, #Admin::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.5s;
+}
+
+#Employee:hover, #Admin:hover {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(45deg, #f8f9fa, #ffffff);
+}
+
+#Employee:hover::before, #Admin:hover::before {
+  left: 100%;
+}
+
+#Employee:active, #Admin:active {
+  transform: translateY(-2px) scale(1.02);
+}
+
+#Employee {
+  background: linear-gradient(45deg, #4facfe, #00f2fe);
+  color: white;
+}
+
+#Employee:hover {
+  background: linear-gradient(45deg, #00f2fe, #4facfe);
+}
+
+#Admin {
+  background: linear-gradient(45deg, #a8edea, #fed6e3);
+  color: #333;
+}
+
+#Admin:hover {
+  background: linear-gradient(45deg, #fed6e3, #a8edea);
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  padding: 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 90%;
+  animation: slideInScale 0.3s ease-out;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 20px 20px 0 0;
+}
+
+.modal-content h2 {
+  color: #333;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 2px solid #e1e5e9;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: #ffffff;
+}
+
+.modal-content input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  transform: translateY(-2px);
+}
+
+.modal-content input::placeholder {
+  color: #a0a0a0;
+  font-weight: 400;
+}
+
+.modal-content > div:last-child {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.modal-content button {
+  flex: 1;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-content button:first-child {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+}
+
+.modal-content button:first-child:hover {
+  background: linear-gradient(45deg, #764ba2, #667eea);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.modal-content button:last-child {
+  background: linear-gradient(45deg, #f1f3f4, #ffffff);
+  color: #333;
+  border: 1px solid #e1e5e9;
+}
+
+.modal-content button:last-child:hover {
+  background: linear-gradient(45deg, #e8eaed, #f1f3f4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content button:active {
+  transform: translateY(0);
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  #welcome {
+    font-size: 2.5rem;
+  }
+  
+  #EMS {
+    font-size: 1.8rem;
+  }
+  
+  #Dev-name {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  #Employee, #Admin {
+    display: block;
+    margin: 0.5rem auto;
+    width: 100%;
+    max-width: 250px;
+    padding: 1rem;
+    font-size: 1.1rem;
+  }
+  
+  .modal-content {
+    padding: 2rem;
+    margin: 1rem;
+  }
+  
+  .modal-content > div:last-child {
+    flex-direction: column;
+  }
+  
+  .modal-content button {
+    margin: 0.25rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome {
+    padding: 1rem;
+  }
+  
+  #welcome {
+    font-size: 2rem;
+  }
+  
+  #EMS {
+    font-size: 1.4rem;
+  }
+  
+  .modal-content {
+    padding: 1.5rem;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.slide-up {
+  animation: slideInUp 0.5s ease-out;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
