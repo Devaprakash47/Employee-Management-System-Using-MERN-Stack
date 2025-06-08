@@ -1,10 +1,17 @@
 import React, { useState } from 'react';
 import EmployeeLogin from './EmployeeLogin';
 import AdminSignIn from './AdminSignIn';
+import AdminRegister from './AdminRegister';
 
 function WelcomePage() {
   const [showEmployee, setShowEmployee] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showAdminRegister, setShowAdminRegister] = useState(false);
+
+  const handleOpenAdminRegister = () => {
+    setShowAdmin(false); // close SignIn modal
+    setShowAdminRegister(true); // open Register modal
+  };
 
   return (
     <div className="welcome">
@@ -15,8 +22,22 @@ function WelcomePage() {
       <button id="Employee" onClick={() => setShowEmployee(true)}>Employee</button>
       <button id="Admin" onClick={() => setShowAdmin(true)}>HR Admin</button>
 
-      {showEmployee && <EmployeeLogin onClose={() => setShowEmployee(false)} />}
-      {showAdmin && <AdminSignIn onClose={() => setShowAdmin(false)} />}
+      {showEmployee && (
+        <EmployeeLogin onClose={() => setShowEmployee(false)} />
+      )}
+
+      {showAdmin && (
+        <AdminSignIn
+          onClose={() => setShowAdmin(false)}
+          onRegister={handleOpenAdminRegister}
+        />
+      )}
+
+      {showAdminRegister && (
+        <AdminRegister
+          onClose={() => setShowAdminRegister(false)}
+        />
+      )}
     </div>
   );
 }
