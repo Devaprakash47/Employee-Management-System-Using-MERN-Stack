@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 function AdminSignIn({ onClose }) {
   return (
@@ -7,6 +8,10 @@ function AdminSignIn({ onClose }) {
         <h2>Admin Sign In</h2>
         <input type="text" placeholder="Username" />
         <input type="password" placeholder="Password" />
+        <div>
+          <p>Don't have an account?</p>
+          <Link to="/admin-signup">Sign Up</Link>
+        </div>
         <div>
           <button>Access</button>
           <button onClick={onClose}>Close</button>

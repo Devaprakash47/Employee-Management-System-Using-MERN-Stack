@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import EmployeeLogin from './EmployeeLogin';
-import AdminSignIn from './AdminSignIn';
-import AdminRegister from './AdminRegister';
+import EmployeeLogin from './Employee/EmployeeLogin';
+import AdminSignIn from './Admin/AdminSignIn';
 
 function WelcomePage() {
   const [showEmployee, setShowEmployee] = useState(false);
@@ -9,8 +8,8 @@ function WelcomePage() {
   const [showAdminRegister, setShowAdminRegister] = useState(false);
 
   const handleOpenAdminRegister = () => {
-    setShowAdmin(false); // close SignIn modal
-    setShowAdminRegister(true); // open Register modal
+    setShowAdmin(false); 
+    setShowAdminRegister(true); 
   };
 
   return (
