@@ -2,14 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function AdminDashboard() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [position, setPosition] = useState('');
-  const [department, setDepartment] = useState('');
-
+  const [form, setForm] = useState({ name: '', email: '', position: '', department: '' });
   const [employees, setEmployees] = useState([]);
 
-  // Fetch employees
   useEffect(() => {
     fetchEmployees();
   }, []);
@@ -17,7 +12,6 @@ function AdminDashboard() {
   const fetchEmployees = async () => {
     try {
       const res = await axios.get('http://localhost:5000/api/employees');
-      // Add isEditing to each employee for local editing
       const updated = res.data.map(emp => ({ ...emp, isEditing: false }));
       setEmployees(updated);
     } catch (err) {
@@ -25,22 +19,23 @@ function AdminDashboard() {
     }
   };
 
-  // Create new employee
+  const handleInputChange = (field, value) => {
+    setForm({ ...form, [field]: value });
+  };
+
   const submit = async () => {
+    const { name, email, position, department } = form;
+    if (!name || !email || !position || !department) return alert('Please fill in all fields');
+
     try {
-      const newEmp = { name, email, position, department };
-      const res = await axios.post('http://localhost:5000/api/employees', newEmp);
+      const res = await axios.post('http://localhost:5000/api/employees', form);
       setEmployees([...employees, { ...res.data, isEditing: false }]);
-      setName('');
-      setEmail('');
-      setPosition('');
-      setDepartment('');
+      setForm({ name: '', email: '', position: '', department: '' });
     } catch (err) {
       console.error(err);
     }
   };
 
-  // Delete employee
   const deleteEmployee = async (id) => {
     try {
       await axios.delete(`http://localhost:5000/api/employees/${id}`);
@@ -50,31 +45,30 @@ function AdminDashboard() {
     }
   };
 
-  // Toggle edit
   const toggleEdit = (index) => {
-    const newData = [...employees];
-    newData[index].isEditing = !newData[index].isEditing;
-    setEmployees(newData);
+    const updated = [...employees];
+    updated[index].isEditing = !updated[index].isEditing;
+    setEmployees(updated);
   };
 
-  // Handle field change in editing
   const handleEditChange = (index, field, value) => {
-    const newData = [...employees];
-    newData[index][field] = value;
-    setEmployees(newData);
+    const updated = [...employees];
+    updated[index][field] = value;
+    setEmployees(updated);
   };
 
-  // Save updated employee
   const saveEmployee = async (index) => {
+    const emp = employees[index];
     try {
-      const emp = employees[index];
-      const { _id, name, email, position, department } = emp;
-      const res = await axios.put(`http://localhost:5000/api/employees/${_id}`, {
-        name, email, position, department
+      const res = await axios.put(`http://localhost:5000/api/employees/${emp._id}`, {
+        name: emp.name,
+        email: emp.email,
+        position: emp.position,
+        department: emp.department
       });
-      const newData = [...employees];
-      newData[index] = { ...res.data, isEditing: false };
-      setEmployees(newData);
+      const updated = [...employees];
+      updated[index] = { ...res.data, isEditing: false };
+      setEmployees(updated);
     } catch (err) {
       console.error(err);
     }
@@ -82,37 +76,37 @@ function AdminDashboard() {
 
   return (
     <div style={{ padding: '2rem' }}>
-      <h2>Admin Dashboard - Employee CRUD</h2>
+      <h2>Admin Dashboard - Manage Employees</h2>
 
-      <div style={{ marginBottom: '1rem' }}>
+      <div style={{ marginBottom: '1.5rem' }}>
         <input
           placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={form.name}
+          onChange={(e) => handleInputChange('name', e.target.value)}
           style={{ marginRight: '0.5rem' }}
         />
         <input
           placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={form.email}
+          onChange={(e) => handleInputChange('email', e.target.value)}
           style={{ marginRight: '0.5rem' }}
         />
         <input
           placeholder="Position"
-          value={position}
-          onChange={(e) => setPosition(e.target.value)}
+          value={form.position}
+          onChange={(e) => handleInputChange('position', e.target.value)}
           style={{ marginRight: '0.5rem' }}
         />
         <input
           placeholder="Department"
-          value={department}
-          onChange={(e) => setDepartment(e.target.value)}
+          value={form.department}
+          onChange={(e) => handleInputChange('department', e.target.value)}
           style={{ marginRight: '0.5rem' }}
         />
         <button onClick={submit}>Add Employee</button>
       </div>
 
-      <table border="1" cellPadding="8">
+      <table border="1" cellPadding="8" style={{ width: '100%', textAlign: 'left' }}>
         <thead>
           <tr>
             <th>Name</th>
@@ -167,11 +161,16 @@ function AdminDashboard() {
               </td>
               <td>
                 {emp.isEditing ? (
-                  <button onClick={() => saveEmployee(index)}>Save</button>
+                  <>
+                    <button onClick={() => saveEmployee(index)}>Save</button>{' '}
+                    <button onClick={() => toggleEdit(index)}>Cancel</button>
+                  </>
                 ) : (
-                  <button onClick={() => toggleEdit(index)}>Edit</button>
+                  <>
+                    <button onClick={() => toggleEdit(index)}>Edit</button>{' '}
+                    <button onClick={() => deleteEmployee(emp._id)}>Delete</button>
+                  </>
                 )}
-                <button onClick={() => deleteEmployee(emp._id)}>Delete</button>
               </td>
             </tr>
           ))}
