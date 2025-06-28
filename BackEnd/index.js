@@ -39,7 +39,7 @@ app.get("/dashboard", verifyUser, (req, res) => {
 });
 
 
-app.post("//admin-signup", async (req, res) => {
+app.post("/admin-signup", async (req, res) => {
     const { name, email, password } = req.body;
     try {
         const hash = await bcrypt.hash(password, 10);
@@ -51,7 +51,7 @@ app.post("//admin-signup", async (req, res) => {
 });
 
 
-app.post("//admin-signin", async (req, res) => {
+app.post("/admin-signin", async (req, res) => {
     const { email, password } = req.body;
 
     try {

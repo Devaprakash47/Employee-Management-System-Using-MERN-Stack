@@ -13,7 +13,7 @@ function AdminSignIn({ onClose }) {
           <Link to="/admin-signup">Sign Up</Link>
         </div>
         <div>
-          <button>Access</button>
+          <Link to="/admin-dashboard"><button>Access</button> </Link>
           <button onClick={onClose}>Close</button>
         </div>
       </div>

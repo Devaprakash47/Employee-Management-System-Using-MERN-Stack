@@ -2,51 +2,40 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-function AdminSignUp({ onClose }) {
+function AdminSignIn({ onClose }) {
   const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSignIn = (e) => {
     e.preventDefault();
 
-    if (password !== confirmPassword) {
-      alert("Passwords do not match!");
-      return;
-    }
-
-    axios.post('http://localhost:3001/admin-register', { username, email, password })
+    axios.post('http://localhost:3001/admin-signin', { username, password })
       .then(res => {
-        alert('Admin registered successfully!');
-        navigate('/admin-signin'); 
-        onClose(); 
+        if (res.data.success) {
+          alert('Login successful!');
+          navigate('/admin-dashboard');
+          onClose(); // Close modal
+        } else {
+          alert('Invalid credentials');
+        }
       })
       .catch(err => {
         console.error(err);
-        alert('Error registering admin.');
+        alert('Error during login');
       });
   };
 
   return (
     <div className="modal">
       <div className="modal-content">
-        <h2>Admin Sign Up</h2>
-        <form onSubmit={handleSubmit}>
+        <h2>Admin Sign In</h2>
+        <form onSubmit={handleSignIn}>
           <input
             type="text"
             placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             required
           />
           <input
@@ -56,19 +45,12 @@ function AdminSignUp({ onClose }) {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-          />
           <div>
-            <p>Already have an account?</p>
-            <Link to="/admin-signin">Sign In</Link>
+            <p>Don't have an account?</p>
+            <Link to="/admin-signup">Sign Up</Link>
           </div>
           <div>
-            <button type="submit">Register</button>
+            <button type="submit">Access</button>
             <button type="button" onClick={onClose}>Close</button>
           </div>
         </form>
@@ -77,4 +59,4 @@ function AdminSignUp({ onClose }) {
   );
 }
 
-export default AdminSignUp;
+export default AdminSignIn;

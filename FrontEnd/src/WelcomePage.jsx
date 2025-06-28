@@ -19,6 +19,7 @@ function WelcomePage() {
       <h3 id="devname">Developed By Devaprakash</h3>
 
       <button id="Employee" onClick={() => setShowEmployee(true)}>Employee</button>
+      <br/>
       <button id="Admin" onClick={() => setShowAdmin(true)}>HR Admin</button>
 
       {showEmployee && (
