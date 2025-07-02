@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 
 function AdminSignIn({ onClose }) {
@@ -13,12 +12,12 @@ function AdminSignIn({ onClose }) {
           <Link to="/admin-signup">Sign Up</Link>
         </div>
         <div>
-          <Link to="/admin-dashboard"><button>Access</button> </Link>
+          <button type="submit">Access</button>
           <button onClick={onClose}>Close</button>
         </div>
       </div>
     </div>
-  );
+  ); 
 }
 
 export default AdminSignIn;

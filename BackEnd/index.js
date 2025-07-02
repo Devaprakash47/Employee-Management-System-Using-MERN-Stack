@@ -39,11 +39,12 @@ app.get("/dashboard", verifyUser, (req, res) => {
 });
 
 
-app.post("/admin-signup", async (req, res) => {
-    const { name, email, password } = req.body;
+app.post("/admin", async (req, res) => {
+    const { username, email, password }=req.body;
+     console.log(username,email,password);
     try {
         const hash = await bcrypt.hash(password, 10);
-        const user = await UserModel.create({ name, email, password: hash });
+        const user = await UserModel.create({ username, email, password: hash });
         res.json("Success");
     } catch (err) {
         res.json(err);
