@@ -4,67 +4,73 @@ import axios from 'axios';
 
 function AdminSignUp({ onClose }) {
   const [username, setUsername] = useState('');
-  const [email,setemail]=useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const handleSignup = (e) => {
     e.preventDefault();
 
-    axios.post('http://localhost:3001/admin', { username,email, password })
+    if (!username || !email || !password) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    axios.post('http://localhost:3001/admin-signup', { username, email, password }, { withCredentials: true })
       .then(res => {
         if (res.data.success) {
-          alert('register successfully!');
+          alert('Registered successfully!');
+          setUsername('');
+          setEmail('');
+          setPassword('');
           navigate('/admin-signin');
-          onClose(); 
+          onClose();
         } else {
-          alert('Invalid credentials');
+          alert(res.data.message || 'Registration failed.');
         }
       })
       .catch(err => {
-        console.error(err);
-        alert('Error during login');
+        console.error("Signup error:", err);
+        alert('Error during registration');
       });
-      setUsername('');
-      setemail('');
-      setPassword('');
   };
 
   return (
     <div className="modal">
       <div className="modal-content">
-        <h2>Admin SignUp</h2>
-        
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setemail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <div>
-            <p>Already have account?</p>
-            <Link to="/admin-signin">Sign In</Link>
-          </div>
-          <div>
-            <button onClick={handleSignup}>Register</button>
-            <button type="button" onClick={onClose}>Close</button>
-          </div>
-        
+        <h2>Admin Sign Up</h2>
+
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+
+        <div>
+          <p>Already have an account?</p>
+          <Link to="/admin-signin">Sign In</Link>
+        </div>
+
+        <div>
+          <button onClick={handleSignup}>Register</button>
+          <button type="button" onClick={onClose}>Close</button>
+        </div>
       </div>
     </div>
   );
