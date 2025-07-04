@@ -33,7 +33,7 @@ function AdminSignUp({ onClose }) {
         console.error("Signup error:", err);
         alert('Error during registration');
       });
-  };
+  };const handleclose=()=>{navigate('/admin-signin')}
 
   return (
     <div className="modal">
@@ -69,7 +69,7 @@ function AdminSignUp({ onClose }) {
 
         <div>
           <button onClick={handleSignup}>Register</button>
-          <button type="button" onClick={onClose}>Close</button>
+          <button type="button" onClick={handleclose}>Close</button>
         </div>
       </div>
     </div>
