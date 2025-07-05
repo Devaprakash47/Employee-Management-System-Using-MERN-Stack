@@ -6,20 +6,25 @@ function AdminSignUp({ onClose }) {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const navigate = useNavigate();
 
   const handleSignup = (e) => {
     e.preventDefault();
 
-    if (!username || !email || !password) {
+    if (!username || !email || !password || !confirmPassword) {
       alert("Please fill in all fields");
       return;
     }
 
-    // Manual email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       alert("Please enter a valid email address.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      alert("Passwords do not match.");
       return;
     }
 
@@ -30,7 +35,8 @@ function AdminSignUp({ onClose }) {
           setUsername('');
           setEmail('');
           setPassword('');
-          navigate('/admin-signin'); // Redirect only on success
+          setConfirmPassword('');
+          navigate('/admin-signin');
         } else {
           alert(res.data.message || 'Registration failed.');
         }
@@ -42,7 +48,7 @@ function AdminSignUp({ onClose }) {
   };
 
   const handleClose = () => {
-    onClose(); // Proper modal close, no navigation
+    onClose();
   };
 
   return (
@@ -72,6 +78,13 @@ function AdminSignUp({ onClose }) {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          <input
+            type="password"
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
 
           <div>
             <p>Already have an account?</p>
@@ -79,11 +92,8 @@ function AdminSignUp({ onClose }) {
           </div>
 
           <div>
-            
             <button type="submit">Register</button>
-            
             <button type="button" onClick={handleClose}>Close</button>
-            
           </div>
         </form>
       </div>
