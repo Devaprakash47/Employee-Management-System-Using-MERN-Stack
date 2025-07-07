@@ -40,8 +40,7 @@ const verifyUser = (req, res, next) => {
     }
 };
 
-// Protected route
-app.get("/dashboard", verifyUser, (req, res) => {
+app.get("/admin-dashboard", verifyUser, (req, res) => {
     res.json({ success: true, message: "Welcome to admin dashboard" });
 });
 
@@ -95,7 +94,6 @@ app.post("/admin-signin", async (req, res) => {
 });
 
 
-// Start server
 app.listen(3001, () => {
     console.log("Server is running on http://localhost:3001");
 });
