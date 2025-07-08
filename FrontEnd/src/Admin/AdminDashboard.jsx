@@ -19,12 +19,13 @@ function AdminDashboard() {
 
   const fetchEmployees = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/employees');
+      const res = await axios.get('http://localhost:3001/api/employees', { withCredentials: true });
       const updated = res.data.map(emp => ({ ...emp, isEditing: false }));
       setEmployees(updated);
       setLastUpdated(new Date().toLocaleString());
     } catch (err) {
       console.error(err);
+      alert("You must be logged in as an admin to view the dashboard.");
     }
   };
 
@@ -38,18 +39,19 @@ function AdminDashboard() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return alert('Invalid email format');
 
     try {
-      const res = await axios.post('http://localhost:5000/api/employees', form);
+      const res = await axios.post('http://localhost:3001/api/employees', form, { withCredentials: true });
       setEmployees([...employees, { ...res.data, isEditing: false }]);
       setForm({ name: '', email: '', position: '', department: '' });
       setLastUpdated(new Date().toLocaleString());
     } catch (err) {
       console.error(err);
+      alert('Error adding employee');
     }
   };
 
   const deleteEmployee = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/employees/${id}`);
+      await axios.delete(`http://localhost:3001/api/employees/${id}`, { withCredentials: true });
       setEmployees(employees.filter(emp => emp._id !== id));
       setLastUpdated(new Date().toLocaleString());
     } catch (err) {
@@ -58,11 +60,15 @@ function AdminDashboard() {
   };
 
   const deleteSelected = async () => {
-    for (let id of selectedIds) {
-      await axios.delete(`http://localhost:5000/api/employees/${id}`);
+    try {
+      for (let id of selectedIds) {
+        await axios.delete(`http://localhost:3001/api/employees/${id}`, { withCredentials: true });
+      }
+      fetchEmployees();
+      setSelectedIds([]);
+    } catch (err) {
+      console.error(err);
     }
-    fetchEmployees();
-    setSelectedIds([]);
   };
 
   const toggleEdit = (index) => {
@@ -80,12 +86,13 @@ function AdminDashboard() {
   const saveEmployee = async (index) => {
     const emp = employees[index];
     try {
-      const res = await axios.put(`http://localhost:5000/api/employees/${emp._id}`, {
+      const res = await axios.put(`http://localhost:3001/api/employees/${emp._id}`, {
         name: emp.name,
         email: emp.email,
         position: emp.position,
         department: emp.department
-      });
+      }, { withCredentials: true });
+
       const updated = [...employees];
       updated[index] = { ...res.data, isEditing: false };
       setEmployees(updated);
