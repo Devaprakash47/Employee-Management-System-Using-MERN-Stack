@@ -1,9 +1,4 @@
-+34
-Lines changed: 34 additions & 0 deletions
 
-
-Original file line number	Diff line number	Diff line change
-@@ -1,230 +1,264 @@
 # Employees Management System (EMS)
 
 > [!IMPORTANT]
