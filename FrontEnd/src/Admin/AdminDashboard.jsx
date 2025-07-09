@@ -1,3 +1,4 @@
+// src/Admin/AdminDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Pie } from 'react-chartjs-2';
@@ -137,27 +138,31 @@ function AdminDashboard() {
   );
 
   return (
-    <div style={{ padding: '2rem' }}>
+    <div className="admin-dashboard">
       <h2>Admin Dashboard - Manage Employees</h2>
-      <input
-        placeholder="Search employees..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        style={{ marginBottom: '1rem' }}
-      />
-      <button onClick={exportCSV} style={{ marginLeft: '1rem' }}>Export CSV</button>
-      <button onClick={deleteSelected} style={{ marginLeft: '1rem' }} disabled={selectedIds.length === 0}>Delete Selected</button>
-      {lastUpdated && <p>Last Updated: {lastUpdated}</p>}
 
-      <div style={{ marginBottom: '1.5rem' }}>
-        <input placeholder="Name" value={form.name} onChange={(e) => handleInputChange('name', e.target.value)} style={{ marginRight: '0.5rem' }} />
-        <input placeholder="Email" value={form.email} onChange={(e) => handleInputChange('email', e.target.value)} style={{ marginRight: '0.5rem' }} />
-        <input placeholder="Position" value={form.position} onChange={(e) => handleInputChange('position', e.target.value)} style={{ marginRight: '0.5rem' }} />
-        <input placeholder="Department" value={form.department} onChange={(e) => handleInputChange('department', e.target.value)} style={{ marginRight: '0.5rem' }} />
-        <button onClick={submit}>Add Employee</button>
+      <div className="top-controls">
+        <input
+          type="text"
+          placeholder="Search employees..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <button onClick={exportCSV}>Export CSV</button>
+        <button onClick={deleteSelected} disabled={selectedIds.length === 0}>Delete Selected</button>
       </div>
 
-      <table border="1" cellPadding="8" style={{ width: '100%', textAlign: 'left' }}>
+      {lastUpdated && <p className="updated-time">Last Updated: {lastUpdated}</p>}
+
+      <div className="form-grid">
+        <input placeholder="Name" value={form.name} onChange={(e) => handleInputChange('name', e.target.value)} />
+        <input placeholder="Email" value={form.email} onChange={(e) => handleInputChange('email', e.target.value)} />
+        <input placeholder="Position" value={form.position} onChange={(e) => handleInputChange('position', e.target.value)} />
+        <input placeholder="Department" value={form.department} onChange={(e) => handleInputChange('department', e.target.value)} />
+      </div>
+      <button onClick={submit}>Add Employee</button>
+
+      <table>
         <thead>
           <tr>
             <th>Select</th>
@@ -194,8 +199,10 @@ function AdminDashboard() {
         </tbody>
       </table>
 
-      <h3 style={{ marginTop: '2rem' }}>Employee Distribution by Department</h3>
-      <Pie data={chartData} />
+      <div className="chart-container">
+        <h3>Employee Distribution by Department</h3>
+        <Pie data={chartData} />
+      </div>
     </div>
   );
 }
