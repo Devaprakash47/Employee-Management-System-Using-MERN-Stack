@@ -1,4 +1,4 @@
-// src/Admin/AdminDashboard.jsx
+import './AdminDashboard.css';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Pie } from 'react-chartjs-2';
