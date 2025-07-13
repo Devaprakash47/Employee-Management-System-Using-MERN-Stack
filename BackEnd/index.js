@@ -9,12 +9,16 @@ const Admin = require("./models/Admin");
 const Employee = require("./models/Employee");
 
 const app = express();
+const PORT = 3001;
+const JWT_SECRET = "jwt-secret-key";
+
+// Middleware
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-    origin: ["http://localhost:5173"], // your frontend port
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
+  origin: ["http://localhost:5173"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
 }));
 
 // MongoDB connection
@@ -26,96 +30,121 @@ mongoose.connect("mongodb://127.0.0.1:27017/ems", {
 
 // JWT Middleware
 const verifyUser = (req, res, next) => {
-    const token = req.cookies.token;
-    if (!token) return res.status(401).json({ success: false, message: "Token is missing" });
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ success: false, message: "Token missing" });
 
-    jwt.verify(token, "jwt-secret-key", (err, decoded) => {
-        if (err) return res.status(401).json({ success: false, message: "Invalid token" });
-        if (decoded.role === "admin") {
-            next();
-        } else {
-            return res.status(403).json({ success: false, message: "Not authorized" });
-        }
-    });
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) return res.status(403).json({ success: false, message: "Invalid token" });
+
+    req.user = decoded; // attach decoded info to request
+    if (decoded.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Access denied" });
+    }
+    next();
+  });
 };
 
-// Admin Routes
+////////////////////////////////////////////////////////////
+// ✅ Admin Signup
 app.post("/admin-signup", async (req, res) => {
-    const { username, email, password } = req.body;
-    try {
-        const existingUser = await Admin.findOne({ email });
-        if (existingUser) return res.json({ success: false, message: "User already exists" });
+  const { username, email, password } = req.body;
+  try {
+    const existingUser = await Admin.findOne({ email });
+    if (existingUser) return res.json({ success: false, message: "Admin already exists" });
 
-        const hash = await bcrypt.hash(password, 10);
-        const user = await Admin.create({ username, email, password: hash });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const admin = await Admin.create({ username, email, password: hashedPassword, role: "admin" });
 
-        res.json({ success: true, message: "Admin registered successfully" });
-    } catch (err) {
-        console.error("Error during registration:", err);
-        res.status(500).json({ success: false, message: "Server error", error: err.message });
-    }
+    res.json({ success: true, message: "Admin registered" });
+  } catch (err) {
+    console.error("Signup error:", err);
+    res.status(500).json({ success: false, message: "Server error", error: err.message });
+  }
 });
 
+////////////////////////////////////////////////////////////
+// ✅ Admin Login
 app.post("/admin-signin", async (req, res) => {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
+  try {
+    const admin = await Admin.findOne({ email });
+    if (!admin) return res.json({ success: false, message: "Admin not found" });
 
-    try {
-        const user = await Admin.findOne({ email });
-        if (!user) return res.json({ success: false, message: "No record found" });
+    const match = await bcrypt.compare(password, admin.password);
+    if (!match) return res.json({ success: false, message: "Wrong password" });
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) return res.json({ success: false, message: "Incorrect password" });
+    const token = jwt.sign({ id: admin._id, email: admin.email, username: admin.username, role: admin.role }, JWT_SECRET, { expiresIn: "1d" });
 
-        const token = jwt.sign({ email: user.email, role: user.role }, "jwt-secret-key", { expiresIn: "1d" });
-        res.cookie("token", token, { httpOnly: true });
-        res.json({ success: true, message: "Login successful", role: user.role });
-    } catch (err) {
-        console.error("Signin error:", err);
-        res.status(500).json({ success: false, message: "Server error", error: err.message });
-    }
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false, // Set to true in production with HTTPS
+      sameSite: "Lax",
+    });
+
+    res.json({ success: true, message: "Login successful", role: admin.role, username: admin.username });
+  } catch (err) {
+    console.error("Signin error:", err);
+    res.status(500).json({ success: false, message: "Server error", error: err.message });
+  }
 });
 
+////////////////////////////////////////////////////////////
+// ✅ Admin Profile Route
+app.get("/api/admin/profile", verifyUser, async (req, res) => {
+  try {
+    const { username, email } = req.user;
+    res.json({ success: true, username, email });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Could not fetch profile" });
+  }
+});
+
+////////////////////////////////////////////////////////////
+// ✅ Protected Dashboard Route
 app.get("/admin-dashboard", verifyUser, (req, res) => {
-    res.json({ success: true, message: "Welcome to admin dashboard" });
+  res.json({ success: true, message: "Welcome to admin dashboard" });
 });
 
-// ✅ Employee API routes
+////////////////////////////////////////////////////////////
+// ✅ Employee CRUD (Protected)
 app.get("/api/employees", verifyUser, async (req, res) => {
-    try {
-        const employees = await Employee.find();
-        res.json(employees);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+  try {
+    const employees = await Employee.find();
+    res.json(employees);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 app.post("/api/employees", verifyUser, async (req, res) => {
-    try {
-        const employee = await Employee.create(req.body);
-        res.status(201).json(employee);
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
+  try {
+    const newEmp = await Employee.create(req.body);
+    res.status(201).json(newEmp);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 });
 
 app.put("/api/employees/:id", verifyUser, async (req, res) => {
-    try {
-        const updated = await Employee.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.json(updated);
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
+  try {
+    const updated = await Employee.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 });
 
 app.delete("/api/employees/:id", verifyUser, async (req, res) => {
-    try {
-        await Employee.findByIdAndDelete(req.params.id);
-        res.json({ message: "Deleted successfully" });
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
+  try {
+    await Employee.findByIdAndDelete(req.params.id);
+    res.json({ message: "Deleted successfully" });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 });
 
-app.listen(3001, () => {
-    console.log("Server is running on http://localhost:3001");
+////////////////////////////////////////////////////////////
+// ✅ Server start
+app.listen(PORT, () => {
+  console.log(`✅ Server running on http://localhost:${PORT}`);
 });

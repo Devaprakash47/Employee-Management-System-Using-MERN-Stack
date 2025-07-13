@@ -13,10 +13,21 @@ function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [lastUpdated, setLastUpdated] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [username, setUsername] = useState('');
 
   useEffect(() => {
     fetchEmployees();
+    fetchAdmin();
   }, []);
+
+  const fetchAdmin = async () => {
+    try {
+      const res = await axios.get('http://localhost:3001/api/admin/profile', { withCredentials: true });
+      setUsername(res.data.username);
+    } catch (err) {
+      console.error('Error fetching admin profile:', err);
+    }
+  };
 
   const fetchEmployees = async () => {
     try {
@@ -139,7 +150,7 @@ function AdminDashboard() {
 
   return (
     <div className="admin-dashboard">
-      <h2>Admin Dashboard - Manage Employees</h2>
+      <h2>Welcome, Admin {username}</h2>
 
       <div className="top-controls">
         <input
