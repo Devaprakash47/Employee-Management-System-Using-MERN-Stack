@@ -1,16 +1,31 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function EmployeeLogin({ onClose }) {
   const [empId, setEmpId] = useState('');
-  const [password, setPassword] = useState('');
+  const [dob, setDob] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    if (empId.trim() && password.trim()) {
-      navigate('/employeepage'); // Redirect to employee page
-    } else {
-      alert('Please enter valid credentials');
+  const handleLogin = async () => {
+    if (!empId.trim() || !dob.trim()) {
+      return alert('Please enter Employee ID and DOB');
+    }
+
+    try {
+      const res = await axios.post('http://localhost:3001/api/employee-login', {
+        empId,
+        dob
+      }, { withCredentials: true });
+
+      if (res.data.success) {
+        navigate('/employeepage');
+      } else {
+        alert(res.data.message || 'Login failed');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      alert('Error during login');
     }
   };
 
@@ -25,10 +40,10 @@ function EmployeeLogin({ onClose }) {
           onChange={(e) => setEmpId(e.target.value)}
         />
         <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          type="date"
+          placeholder="DOB"
+          value={dob}
+          onChange={(e) => setDob(e.target.value)}
         />
         <div>
           <button onClick={handleLogin}>Login</button>
