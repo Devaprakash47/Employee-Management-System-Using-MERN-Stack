@@ -12,7 +12,6 @@ const app = express();
 const PORT = 3001;
 const JWT_SECRET = "jwt-secret-key";
 
-// MongoDB connection
 mongoose.connect("mongodb://127.0.0.1:27017/ems", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -26,7 +25,6 @@ mongoose.connection.on("error", (err) => {
   console.error("❌ MongoDB connection error:", err);
 });
 
-// Middleware
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
@@ -35,7 +33,6 @@ app.use(cors({
   credentials: true
 }));
 
-// JWT Middleware
 const verifyUser = (req, res, next) => {
   const token = req.cookies.token;
   if (!token) return res.status(401).json({ success: false, message: "Token missing" });
@@ -43,7 +40,7 @@ const verifyUser = (req, res, next) => {
   jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) return res.status(403).json({ success: false, message: "Invalid token" });
 
-    req.user = decoded; // attach decoded info to request
+    req.user = decoded; 
     if (decoded.role !== "admin") {
       return res.status(403).json({ success: false, message: "Access denied" });
     }
@@ -51,8 +48,6 @@ const verifyUser = (req, res, next) => {
   });
 };
 
-////////////////////////////////////////////////////////////
-// ✅ Admin Signup
 app.post("/admin-signup", async (req, res) => {
   const { username, email, password } = req.body;
   try {
@@ -76,8 +71,6 @@ app.post("/admin-signup", async (req, res) => {
   }
 });
 
-////////////////////////////////////////////////////////////
-// ✅ Admin Login
 app.post("/admin-signin", async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -100,7 +93,7 @@ app.post("/admin-signin", async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // Set to true in production
+      secure: false, 
       sameSite: "Lax",
     });
 
@@ -111,8 +104,6 @@ app.post("/admin-signin", async (req, res) => {
   }
 });
 
-////////////////////////////////////////////////////////////
-// ✅ Admin Profile Route
 app.get("/api/admin/profile", verifyUser, async (req, res) => {
   try {
     const { username, email } = req.user;
@@ -122,14 +113,10 @@ app.get("/api/admin/profile", verifyUser, async (req, res) => {
   }
 });
 
-////////////////////////////////////////////////////////////
-// ✅ Protected Admin Dashboard Route
 app.get("/admin-dashboard", verifyUser, (req, res) => {
   res.json({ success: true, message: "Welcome to admin dashboard" });
 });
 
-////////////////////////////////////////////////////////////
-// ✅ Employee CRUD (Protected)
 app.get("/api/employees", verifyUser, async (req, res) => {
   try {
     const employees = await Employee.find();
@@ -166,8 +153,6 @@ app.delete("/api/employees/:id", verifyUser, async (req, res) => {
   }
 });
 
-////////////////////////////////////////////////////////////
-// ✅ Server start
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
 });

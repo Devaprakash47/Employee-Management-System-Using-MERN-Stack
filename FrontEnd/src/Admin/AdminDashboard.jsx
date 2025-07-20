@@ -45,7 +45,8 @@ function AdminDashboard() {
     setForm({ ...form, [field]: value });
   };
 
-  const submit = async () => {
+  const submit = async (e) => {
+    e.preventDefault();
     const { name, email, position, department } = form;
     if (!name || !email || !position || !department) return alert('Please fill in all fields');
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return alert('Invalid email format');
@@ -62,6 +63,7 @@ function AdminDashboard() {
   };
 
   const deleteEmployee = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this employee?")) return;
     try {
       await axios.delete(`http://localhost:3001/api/employees/${id}`, { withCredentials: true });
       setEmployees(employees.filter(emp => emp._id !== id));
@@ -72,6 +74,7 @@ function AdminDashboard() {
   };
 
   const deleteSelected = async () => {
+    if (!window.confirm("Delete selected employees?")) return;
     try {
       for (let id of selectedIds) {
         await axios.delete(`http://localhost:3001/api/employees/${id}`, { withCredentials: true });
@@ -127,10 +130,12 @@ function AdminDashboard() {
     link.setAttribute('download', 'employees.csv');
     document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
   };
 
   const departmentCounts = employees.reduce((acc, emp) => {
-    acc[emp.department] = (acc[emp.department] || 0) + 1;
+    const dept = emp.department || 'Unknown';
+    acc[dept] = (acc[dept] || 0) + 1;
     return acc;
   }, {});
 
@@ -138,7 +143,7 @@ function AdminDashboard() {
     labels: Object.keys(departmentCounts),
     datasets: [{
       data: Object.values(departmentCounts),
-      backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50'],
+      backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#9C27B0', '#FF5722'],
     }]
   };
 
@@ -165,13 +170,13 @@ function AdminDashboard() {
 
       {lastUpdated && <p className="updated-time">Last Updated: {lastUpdated}</p>}
 
-      <div className="form-grid">
+      <form className="form-grid" onSubmit={submit}>
         <input placeholder="Name" value={form.name} onChange={(e) => handleInputChange('name', e.target.value)} />
         <input placeholder="Email" value={form.email} onChange={(e) => handleInputChange('email', e.target.value)} />
         <input placeholder="Position" value={form.position} onChange={(e) => handleInputChange('position', e.target.value)} />
         <input placeholder="Department" value={form.department} onChange={(e) => handleInputChange('department', e.target.value)} />
-      </div>
-      <button onClick={submit}>Add Employee</button>
+        <button type="submit">Add Employee</button>
+      </form>
 
       <table>
         <thead>
