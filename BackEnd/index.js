@@ -10,14 +10,14 @@ const Employee = require("./models/Employee");
 
 const app = express();
 const PORT = 3001;
-const JWT_SECRET = "jwt-secret-key";
+const JWT_SECRET = "jwt-secret-key"; // You can also store this in .env
 
 // MongoDB Connection
 mongoose.connect("mongodb://127.0.0.1:27017/ems", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
-mongoose.set('strictQuery', true);
+mongoose.set("strictQuery", true);
 
 mongoose.connection.on("connected", () => {
   console.log("✅ MongoDB connected");
@@ -30,7 +30,7 @@ mongoose.connection.on("error", (err) => {
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: ["http://localhost:5173"],
+  origin: ["http://localhost:5173"], // frontend URL
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
@@ -82,8 +82,8 @@ app.post("/admin-signin", async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // true in production
-      sameSite: "Lax",
+      secure: false,
+      sameSite: "Lax"
     });
 
     res.json({ success: true, message: "Login successful", role: admin.role, username: admin.username });
