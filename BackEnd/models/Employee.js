@@ -1,14 +1,14 @@
-const mongoose = require("mongoose");
+// models/Employee.js
+const mongoose = require('mongoose');
 
 const employeeSchema = new mongoose.Schema({
-  employeeId: { type: String, required: true, unique: true }, // Unique Employee ID
-  name: { type: String, required: true },
-  email: { type: String, unique: true, sparse: true },
-  password: { type: String },
-  dob: { type: String, required: true },
-  joiningDate: { type: String, required: true },
-  salary: { type: String, required: true },
-  position: { type: String, required: true },
-}, { timestamps: true });
+  name: String,
+  email: { type: String, unique: true },
+  password: { type: String, required: true }, // no select:false
+  dob: String,
+  joiningDate: String,
+  salary: String,
+  position: String,
+});
 
-module.exports = mongoose.model("Employee", employeeSchema);
+module.exports = mongoose.model('Employee', employeeSchema);
