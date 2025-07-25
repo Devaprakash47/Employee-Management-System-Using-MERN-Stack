@@ -15,7 +15,6 @@ function AdminSignIn({ onClose }) {
         if (res.data.success) {
           alert(res.data.message || "Login successful");
           navigate('/admin-dashboard'); // redirect to admin dashboard
-          if (onClose) onClose();
         } else {
           alert(res.data.message || "Login failed");
         }
@@ -24,6 +23,14 @@ function AdminSignIn({ onClose }) {
         console.error("Signin error:", err);
         alert("An error occurred during login.");
       });
+  };
+
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      navigate('/'); // fallback navigation to welcome/home
+    }
   };
 
   return (
@@ -48,7 +55,7 @@ function AdminSignIn({ onClose }) {
         </div>
         <div>
           <button type="submit" onClick={handleSignin}>Access</button>
-          <button onClick={onClose}>Close</button>
+          <button type="button" onClick={handleClose}>Close</button>
         </div>
       </div>
     </div>

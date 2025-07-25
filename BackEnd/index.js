@@ -10,45 +10,41 @@ const Employee = require("./models/Employee");
 
 const app = express();
 const PORT = 3001;
-const JWT_SECRET = "jwt-secret-key"; // You can also store this in .env
+const JWT_SECRET = "jwt-secret-key";
 
-// MongoDB Connection
 mongoose.connect("mongodb://127.0.0.1:27017/ems", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 mongoose.set("strictQuery", true);
 
-mongoose.connection.on("connected", () => {
-  console.log("✅ MongoDB connected");
-});
-mongoose.connection.on("error", (err) => {
-  console.error("❌ MongoDB connection error:", err);
-});
+mongoose.connection.on("connected", () => console.log("✅ MongoDB connected"));
+mongoose.connection.on("error", (err) => console.error("❌ MongoDB error:", err));
 
-// Middleware
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: ["http://localhost:5173"], // frontend URL
+  origin: "http://localhost:5173",
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
 
-// Auth Middleware
-const verifyUser = (req, res, next) => {
+// 🔐 Middleware
+const verifyRole = (role) => (req, res, next) => {
   const token = req.cookies.token;
   if (!token) return res.status(401).json({ success: false, message: "Token missing" });
 
   jwt.verify(token, JWT_SECRET, (err, decoded) => {
-    if (err) return res.status(403).json({ success: false, message: "Invalid token" });
-    if (decoded.role !== "admin") return res.status(403).json({ success: false, message: "Access denied" });
+    if (err || decoded.role !== role)
+      return res.status(403).json({ success: false, message: "Access denied" });
     req.user = decoded;
     next();
   });
 };
 
-// Admin Signup
+//////////////////////////////
+// 👨‍💼 ADMIN ROUTES
+//////////////////////////////
 app.post("/admin-signup", async (req, res) => {
   const { username, email, password } = req.body;
   try {
@@ -64,7 +60,6 @@ app.post("/admin-signup", async (req, res) => {
   }
 });
 
-// Admin Signin
 app.post("/admin-signin", async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -80,11 +75,7 @@ app.post("/admin-signin", async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "Lax"
-    });
+    res.cookie("token", token, { httpOnly: true, secure: false, sameSite: "Lax" });
 
     res.json({ success: true, message: "Login successful", role: admin.role, username: admin.username });
   } catch (err) {
@@ -92,29 +83,102 @@ app.post("/admin-signin", async (req, res) => {
   }
 });
 
-// Admin Profile
-app.get("/api/admin/profile", verifyUser, (req, res) => {
+app.get("/api/admin/profile", verifyRole("admin"), (req, res) => {
   const { username, email } = req.user;
   res.json({ success: true, username, email });
 });
 
-// Admin Dashboard Access
-app.get("/admin-dashboard", verifyUser, (req, res) => {
+app.get("/admin-dashboard", verifyRole("admin"), (req, res) => {
   res.json({ success: true, message: "Welcome to admin dashboard" });
 });
 
-// Get All Employees
-app.get("/api/employees", verifyUser, async (req, res) => {
+//////////////////////////////
+// 🧑‍💻 EMPLOYEE ROUTES
+//////////////////////////////
+app.post("/employee-signup", async (req, res) => {
+  const { employeeId, name, email, password, dob, joiningDate, salary, position } = req.body;
   try {
-    const employees = await Employee.find();
+    const existing = await Employee.findOne({ email });
+    if (existing) return res.json({ success: false, message: "Employee already exists" });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newEmployee = await Employee.create({
+      employeeId,
+      name,
+      email,
+      password: hashedPassword,
+      dob,
+      joiningDate,
+      salary,
+      position,
+      role: "employee",
+    });
+
+    res.json({ success: true, message: "Employee registered", employee: newEmployee });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Signup failed", error: err.message });
+  }
+});
+
+app.post("/employee-login", async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const employee = await Employee.findOne({ email });
+    if (!employee) return res.json({ success: false, message: "Employee not found" });
+
+    const match = await bcrypt.compare(password, employee.password);
+    if (!match) return res.json({ success: false, message: "Wrong password" });
+
+    const token = jwt.sign(
+      { id: employee._id, email: employee.email, name: employee.name, role: employee.role },
+      JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.cookie("token", token, { httpOnly: true, secure: false, sameSite: "Lax" });
+
+    res.json({
+      success: true,
+      message: "Login successful",
+      role: employee.role,
+      employee: {
+        id: employee._id,
+        name: employee.name,
+        email: employee.email,
+        position: employee.position,
+        employeeId: employee.employeeId
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Login failed", error: err.message });
+  }
+});
+
+app.get("/api/employee/profile", verifyRole("employee"), async (req, res) => {
+  try {
+    const employee = await Employee.findById(req.user.id).select("-password");
+    if (!employee) return res.status(404).json({ success: false, message: "Employee not found" });
+
+    res.json({ success: true, employee });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Profile fetch failed", error: err.message });
+  }
+});
+
+//////////////////////////////
+// 🔧 EMPLOYEE CRUD (Admin Only)
+//////////////////////////////
+app.get("/api/employees", verifyRole("admin"), async (req, res) => {
+  try {
+    const employees = await Employee.find().select("-password");
     res.json({ success: true, data: employees });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
 
-// Add Employee
-app.post("/api/employees", verifyUser, async (req, res) => {
+app.post("/api/employees", verifyRole("admin"), async (req, res) => {
   try {
     const newEmp = await Employee.create(req.body);
     res.status(201).json({ success: true, data: newEmp });
@@ -123,8 +187,7 @@ app.post("/api/employees", verifyUser, async (req, res) => {
   }
 });
 
-// Update Employee
-app.put("/api/employees/:id", verifyUser, async (req, res) => {
+app.put("/api/employees/:id", verifyRole("admin"), async (req, res) => {
   try {
     const updated = await Employee.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json({ success: true, data: updated });
@@ -133,8 +196,7 @@ app.put("/api/employees/:id", verifyUser, async (req, res) => {
   }
 });
 
-// Delete Employee
-app.delete("/api/employees/:id", verifyUser, async (req, res) => {
+app.delete("/api/employees/:id", verifyRole("admin"), async (req, res) => {
   try {
     await Employee.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: "Employee deleted successfully" });
@@ -143,7 +205,9 @@ app.delete("/api/employees/:id", verifyUser, async (req, res) => {
   }
 });
 
-// Server Start
+//////////////////////////////
+// 🚀 START SERVER
+//////////////////////////////
 app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`✅ Server running at http://localhost:${PORT}`);
 });

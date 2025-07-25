@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-function AdminSignUp({ onClose }) {
+function AdminSignUp() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
 
     if (!username || !email || !password || !confirmPassword) {
@@ -28,27 +28,27 @@ function AdminSignUp({ onClose }) {
       return;
     }
 
-    axios.post('http://localhost:3001/admin-signup', { username, email, password }, { withCredentials: true })
-      .then(res => {
-        if (res.data.success) {
-          alert('Registered successfully!');
-          setUsername('');
-          setEmail('');
-          setPassword('');
-          setConfirmPassword('');
-          navigate('/admin-signin');
-        } else {
-          alert(res.data.message || 'Registration failed.');
-        }
-      })
-      .catch(err => {
-        console.error("Signup error:", err);
-        alert('Error during registration');
-      });
+    try {
+      const res = await axios.post(
+        'http://localhost:3001/admin-signup',
+        { username, email, password },
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        alert('Registered successfully!');
+        navigate('/admin-signin');
+      } else {
+        alert(res.data.message || 'Registration failed.');
+      }
+    } catch (err) {
+      console.error("Signup error:", err);
+      alert('Error during registration');
+    }
   };
 
   const handleClose = () => {
-    onClose();
+    navigate('/admin-signin'); // Redirect on close
   };
 
   return (
@@ -87,8 +87,7 @@ function AdminSignUp({ onClose }) {
           />
 
           <div>
-            <p>Already have an account?</p>
-            <Link to="/admin-signin">Sign In</Link>
+            <p>Already have an account? <Link to="/admin-signin">Sign In</Link></p>
           </div>
 
           <div>
