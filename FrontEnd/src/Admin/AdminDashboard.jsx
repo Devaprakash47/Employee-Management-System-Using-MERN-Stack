@@ -234,7 +234,8 @@ const AdminDashboard = () => {
                   <td>₹{emp.salary}</td>
                   <td>{emp.position}</td>
                   <td>
-                    <button onClick={() => handleEditEmployee(emp)} style={{ background: "#1890ff", marginRight: "5px" }}>Edit</button>
+                    <button onClick={() => handleEditEmployee(emp)} style={{ background: "#1890ff"}}>Edit</button>
+                    <br/>
                     <button onClick={() => handleDeleteEmployee(emp._id)} style={{ background: "#ff4d4f" }}>Delete</button>
                   </td>
                 </tr>
