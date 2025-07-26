@@ -10,7 +10,14 @@ const EmployeeSchema = new mongoose.Schema({
   dob: Date,
   joiningDate: Date,
   totalLeaves: Number,
-  leavesTaken: Number,
+  leaveRequests: [
+  {
+    date: { type: Date, default: Date.now },
+    status: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" }
+  }
+]
+
+
 });
 
 module.exports = mongoose.model("Employee", EmployeeSchema);

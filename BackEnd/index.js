@@ -30,6 +30,7 @@ app.use(cors({
   credentials: true
 }));
 
+// Role verification middleware
 const verifyRole = (role) => (req, res, next) => {
   const token = req.cookies.token;
   if (!token) return res.status(401).json({ success: false, message: "Token missing" });
@@ -42,9 +43,9 @@ const verifyRole = (role) => (req, res, next) => {
   });
 };
 
-//////////////////////////////
-// 👨‍💼 ADMIN ROUTES
-//////////////////////////////
+//////////////////////////////////////////////////
+// 🧑‍💼 ADMIN AUTH ROUTES
+//////////////////////////////////////////////////
 app.post("/admin-signup", async (req, res) => {
   const { username, email, password } = req.body;
   try {
@@ -88,26 +89,24 @@ app.get("/api/admin/profile", verifyRole("admin"), (req, res) => {
   res.json({ success: true, username, email });
 });
 
-app.get("/admin-dashboard", verifyRole("admin"), (req, res) => {
-  res.json({ success: true, message: "Welcome to admin dashboard" });
-});
-
-//////////////////////////////
-// 🧑‍💻 EMPLOYEE ROUTES (Plain password)
-//////////////////////////////
-
+//////////////////////////////////////////////////
+// 🧑‍💻 EMPLOYEE AUTH ROUTES
+//////////////////////////////////////////////////
 app.post("/employee-login", async (req, res) => {
   const { email, password } = req.body;
   try {
     const employee = await Employee.findOne({ email });
     if (!employee) return res.json({ success: false, message: "Employee not found" });
 
+    // ⚠️ Plain password check (NOT recommended for prod)
     if (employee.password !== password) {
       return res.json({ success: false, message: "Wrong password" });
     }
 
+    const role = employee.role || "employee"; // ✅ Default role
+
     const token = jwt.sign(
-      { id: employee._id, email: employee.email, name: employee.name, role: employee.role },
+      { id: employee._id, email: employee.email, name: employee.name, role },
       JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -117,7 +116,7 @@ app.post("/employee-login", async (req, res) => {
     res.json({
       success: true,
       message: "Login successful",
-      role: employee.role,
+      role,
       employee: {
         id: employee._id,
         name: employee.name,
@@ -142,9 +141,9 @@ app.get("/api/employee/profile", verifyRole("employee"), async (req, res) => {
   }
 });
 
-//////////////////////////////
-// 🔧 EMPLOYEE CRUD (Admin Only)
-//////////////////////////////
+//////////////////////////////////////////////////
+// 👩‍💻 EMPLOYEE CRUD ROUTES (ADMIN ONLY)
+//////////////////////////////////////////////////
 app.get("/api/employees", verifyRole("admin"), async (req, res) => {
   try {
     const employees = await Employee.find().select("-password");
@@ -156,7 +155,10 @@ app.get("/api/employees", verifyRole("admin"), async (req, res) => {
 
 app.post("/api/employees", verifyRole("admin"), async (req, res) => {
   try {
-    const newEmp = await Employee.create(req.body);
+    const newEmp = await Employee.create({
+      ...req.body,
+      role: "employee" // ✅ Ensure the role is set
+    });
     res.status(201).json({ success: true, data: newEmp });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -181,9 +183,27 @@ app.delete("/api/employees/:id", verifyRole("admin"), async (req, res) => {
   }
 });
 
-//////////////////////////////
+//////////////////////////////////////////////////
 // 🚀 START SERVER
-//////////////////////////////
+//////////////////////////////////////////////////
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
+const handleLeaveRequest = async () => {
+  try {
+    const res = await axios.post(
+      "http://localhost:3001/api/employee/request-leave",
+      {},
+      { withCredentials: true }
+    );
+    if (res.data.success) {
+      setLeaveRequested(true);
+      alert("Leave request submitted!");
+    } else {
+      alert("Failed to request leave.");
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Error submitting leave request.");
+  }
+};
