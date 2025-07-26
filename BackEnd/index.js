@@ -12,15 +12,16 @@ const app = express();
 const PORT = 3001;
 const JWT_SECRET = "jwt-secret-key";
 
+// Connect MongoDB
 mongoose.connect("mongodb://127.0.0.1:27017/ems", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 mongoose.set("strictQuery", true);
-
 mongoose.connection.on("connected", () => console.log("✅ MongoDB connected"));
 mongoose.connection.on("error", (err) => console.error("❌ MongoDB error:", err));
 
+// Middleware
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
@@ -29,7 +30,6 @@ app.use(cors({
   credentials: true
 }));
 
-// 🔐 Middleware
 const verifyRole = (role) => (req, res, next) => {
   const token = req.cookies.token;
   if (!token) return res.status(401).json({ success: false, message: "Token missing" });
@@ -93,33 +93,8 @@ app.get("/admin-dashboard", verifyRole("admin"), (req, res) => {
 });
 
 //////////////////////////////
-// 🧑‍💻 EMPLOYEE ROUTES
+// 🧑‍💻 EMPLOYEE ROUTES (Plain password)
 //////////////////////////////
-app.post("/employee-signup", async (req, res) => {
-  const { employeeId, name, email, password, dob, joiningDate, salary, position } = req.body;
-  try {
-    const existing = await Employee.findOne({ email });
-    if (existing) return res.json({ success: false, message: "Employee already exists" });
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newEmployee = await Employee.create({
-      employeeId,
-      name,
-      email,
-      password: hashedPassword,
-      dob,
-      joiningDate,
-      salary,
-      position,
-      role: "employee",
-    });
-
-    res.json({ success: true, message: "Employee registered", employee: newEmployee });
-  } catch (err) {
-    res.status(500).json({ success: false, message: "Signup failed", error: err.message });
-  }
-});
 
 app.post("/employee-login", async (req, res) => {
   const { email, password } = req.body;
@@ -127,8 +102,9 @@ app.post("/employee-login", async (req, res) => {
     const employee = await Employee.findOne({ email });
     if (!employee) return res.json({ success: false, message: "Employee not found" });
 
-    const match = await bcrypt.compare(password, employee.password);
-    if (!match) return res.json({ success: false, message: "Wrong password" });
+    if (employee.password !== password) {
+      return res.json({ success: false, message: "Wrong password" });
+    }
 
     const token = jwt.sign(
       { id: employee._id, email: employee.email, name: employee.name, role: employee.role },

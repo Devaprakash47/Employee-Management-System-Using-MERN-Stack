@@ -1,7 +1,7 @@
-// EmployeeLogin.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+// import './ModalStyles.css'; // Optional: your modal styles here
 
 function EmployeeLogin({ onClose }) {
   const [email, setEmail] = useState('');
@@ -10,27 +10,27 @@ function EmployeeLogin({ onClose }) {
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      return alert('Please enter Email and Password');
+      return alert('Please enter both Email and Password');
     }
 
     try {
-      const res = await axios.post('http://localhost:3001/employee-login', {
-        email,
-        password,
-      }, { withCredentials: true });
+      const res = await axios.post(
+        'http://localhost:3001/employee-login',
+        { email, password },
+        { withCredentials: true }
+      );
 
-      if (res.data.success) {
-        const employee = res.data.employee;
-        alert(`Welcome, ${employee.name}`);
-        // Optional: save employee info in localStorage or context
-        localStorage.setItem('employee', JSON.stringify(employee));
+      if (res.status === 200 && res.data.employee) {
+        const { name, _id, email } = res.data.employee;
+        alert(`Welcome, ${name}`);
+        localStorage.setItem('employee', JSON.stringify({ name, _id, email }));
         navigate('/employeepage');
       } else {
-        alert(res.data.message || 'Login failed');
+        alert(res.data.message || 'Invalid email or password');
       }
     } catch (err) {
-      console.error('Login error:', err);
-      alert('Error during login');
+      console.error('Login error:', err.response?.data || err.message);
+      alert(err.response?.data?.message || 'Server error during login');
     }
   };
 

@@ -5,17 +5,18 @@ function EmployeePage() {
   const [employee, setEmployee] = useState(null);
   const [leaveRequested, setLeaveRequested] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchEmployee = async () => {
       try {
-        const res = await axios.get("http://localhost:3001/api/employees/me", {
+        const res = await axios.get("http://localhost:3001/api/employees/", {
           withCredentials: true,
         });
         setEmployee(res.data);
       } catch (err) {
-        alert("Session expired or unauthorized.");
-        console.error(err);
+        console.error("Error fetching employee data:", err);
+        setError("Session expired or unauthorized.");
       } finally {
         setLoading(false);
       }
@@ -24,13 +25,21 @@ function EmployeePage() {
     fetchEmployee();
   }, []);
 
-  const handleLeaveRequest = () => {
-    setLeaveRequested(true);
-    alert("Leave request submitted successfully!");
-    // Optional: POST to a leave request endpoint here
+  const handleLeaveRequest = async () => {
+    try {
+      // Optional: You can POST to a real endpoint here
+      // await axios.post("http://localhost:3001/api/employees/request-leave", { employeeId: employee._id });
+
+      setLeaveRequested(true);
+      alert("Leave request submitted successfully!");
+    } catch (err) {
+      console.error("Leave request failed:", err);
+      alert("Failed to request leave.");
+    }
   };
 
   if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
   if (!employee) return <p>Employee not found or not logged in.</p>;
 
   const leavesRemaining = employee.totalLeaves - employee.leavesTaken;
@@ -42,8 +51,10 @@ function EmployeePage() {
       <div style={styles.section}>
         <h3>Employee Information</h3>
         <p><strong>Name:</strong> {employee.name}</p>
+        <p><strong>Email:</strong> {employee.email}</p>
         <p><strong>ID:</strong> {employee.employeeId}</p>
         <p><strong>Position:</strong> {employee.position}</p>
+        <p><strong>Joining Date:</strong> {new Date(employee.joiningDate).toLocaleDateString()}</p>
       </div>
 
       <div style={styles.section}>
@@ -64,7 +75,7 @@ function EmployeePage() {
             cursor: leaveRequested ? "not-allowed" : "pointer"
           }}
         >
-          {leaveRequested ? "Permission Requested" : "Request Leave Permission"}
+          {leaveRequested ? "Leave Requested" : "Request Leave"}
         </button>
       </div>
     </div>
@@ -73,24 +84,24 @@ function EmployeePage() {
 
 const styles = {
   container: {
-    maxWidth: "600px",
+    maxWidth: "650px",
     margin: "2rem auto",
     padding: "2rem",
-    border: "1px solid #ddd",
+    border: "1px solid #ccc",
     borderRadius: "10px",
-    fontFamily: "Arial, sans-serif",
-    backgroundColor: "#f9f9f9",
+    fontFamily: "Segoe UI, sans-serif",
+    backgroundColor: "#f0f4f8",
   },
   heading: {
     textAlign: "center",
-    color: "#333",
+    color: "#2c3e50",
   },
   section: {
     marginTop: "1.5rem",
     padding: "1rem",
-    backgroundColor: "#fff",
+    backgroundColor: "#ffffff",
     borderRadius: "8px",
-    boxShadow: "0 0 5px rgba(0,0,0,0.1)",
+    boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
   },
   button: {
     padding: "0.6rem 1.2rem",

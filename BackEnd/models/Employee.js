@@ -1,14 +1,16 @@
-// models/Employee.js
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const employeeSchema = new mongoose.Schema({
+const EmployeeSchema = new mongoose.Schema({
+  employeeId: String,
   name: String,
-  email: { type: String, unique: true },
-  password: { type: String, required: true }, // no select:false
-  dob: String,
-  joiningDate: String,
-  salary: String,
+  email: String,
+  password: String,
   position: String,
+  salary: Number,
+  dob: Date,
+  joiningDate: Date,
+  totalLeaves: Number,
+  leavesTaken: Number,
 });
 
-module.exports = mongoose.model('Employee', employeeSchema);
+module.exports = mongoose.model("Employee", EmployeeSchema);
