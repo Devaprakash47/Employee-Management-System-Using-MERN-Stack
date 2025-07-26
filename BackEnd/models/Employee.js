@@ -1,3 +1,4 @@
+// models/Employee.js
 const mongoose = require("mongoose");
 
 const EmployeeSchema = new mongoose.Schema({
@@ -9,15 +10,20 @@ const EmployeeSchema = new mongoose.Schema({
   salary: Number,
   dob: Date,
   joiningDate: Date,
-  totalLeaves: Number,
+  totalLeaves: {
+    type: Number,
+    default: 20,
+  },
+  leavesTaken: {
+    type: Number,
+    default: 0,
+  },
   leaveRequests: [
-  {
-    date: { type: Date, default: Date.now },
-    status: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" }
-  }
-]
-
-
+    {
+      date: { type: Date, default: Date.now },
+      status: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },
+    }
+  ]
 });
 
 module.exports = mongoose.model("Employee", EmployeeSchema);

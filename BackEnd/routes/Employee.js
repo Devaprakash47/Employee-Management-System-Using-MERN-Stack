@@ -35,3 +35,20 @@ router.post("/request-leave", authenticateEmployee, async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+// routes/employee.js or similar
+router.post("/request-leave", authMiddleware, async (req, res) => {
+  try {
+    const employeeId = req.user.id;
+
+    const employee = await Employee.findById(employeeId);
+    if (!employee) return res.status(404).json({ success: false, message: "Employee not found" });
+
+    employee.leaveRequests.push({ status: "Pending" });
+    await employee.save();
+
+    res.json({ success: true, message: "Leave requested" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});

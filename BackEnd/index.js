@@ -207,3 +207,67 @@ const handleLeaveRequest = async () => {
     alert("Error submitting leave request.");
   }
 };
+//////////////////////////////////////////////////
+// ✋ EMPLOYEE LEAVE REQUEST (EMPLOYEE)
+//////////////////////////////////////////////////
+app.post("/api/employee/request-leave", verifyRole("employee"), async (req, res) => {
+  try {
+    const employee = await Employee.findById(req.user.id);
+    if (!employee) return res.status(404).json({ success: false, message: "Employee not found" });
+
+    employee.leaveRequests.push({ status: "Pending" });
+    await employee.save();
+
+    res.json({ success: true, message: "Leave requested" });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Server error", error: err.message });
+  }
+});
+
+//////////////////////////////////////////////////
+// 📥 GET PENDING LEAVE REQUESTS (ADMIN)
+//////////////////////////////////////////////////
+app.get("/api/admin/leave-requests", verifyRole("admin"), async (req, res) => {
+  try {
+    const employees = await Employee.find({ "leaveRequests.status": "Pending" }).select("-password");
+    res.json({ success: true, data: employees });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+//////////////////////////////////////////////////
+// ✅ APPROVE / ❌ REJECT LEAVE (ADMIN)
+//////////////////////////////////////////////////
+app.post("/api/admin/leave-requests/:employeeId/:index/:action", verifyRole("admin"), async (req, res) => {
+  const { employeeId, index, action } = req.params;
+
+  if (!["approve", "reject"].includes(action)) {
+    return res.status(400).json({ success: false, message: "Invalid action" });
+  }
+
+  try {
+    const employee = await Employee.findById(employeeId);
+    if (!employee) return res.status(404).json({ success: false, message: "Employee not found" });
+
+    const leaveIndex = parseInt(index);
+    const leave = employee.leaveRequests[leaveIndex];
+
+    if (!leave || leave.status !== "Pending") {
+      return res.status(400).json({ success: false, message: "Invalid or already processed request" });
+    }
+
+    // Update leave request status
+    leave.status = action === "approve" ? "Approved" : "Rejected";
+
+    // Increment leavesTaken only if approved
+    if (action === "approve") {
+      employee.leavesTaken = (employee.leavesTaken || 0) + 1;
+    }
+
+    await employee.save();
+    res.json({ success: true, message: `Leave ${action}d successfully.` });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Server error", error: err.message });
+  }
+});

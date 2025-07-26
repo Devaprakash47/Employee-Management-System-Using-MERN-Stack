@@ -4,6 +4,7 @@ import "./AdminDashboard.css";
 
 const AdminDashboard = () => {
   const [employees, setEmployees] = useState([]);
+  const [leaveRequests, setLeaveRequests] = useState([]);
   const [employeeData, setEmployeeData] = useState({
     employeeId: "",
     name: "",
@@ -13,6 +14,8 @@ const AdminDashboard = () => {
     joiningDate: "",
     salary: "",
     position: "",
+    totalLeave: "",
+    takenLeave: "",
   });
 
   const [editingEmployeeId, setEditingEmployeeId] = useState(null);
@@ -36,9 +39,37 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchLeaveRequests = async () => {
+    try {
+      const res = await axios.get("http://localhost:3001/api/admin/leave-requests", {
+        withCredentials: true,
+      });
+      setLeaveRequests(res.data.data || []);
+    } catch (err) {
+      console.error("Error fetching leave requests:", err);
+    }
+  };
+
   useEffect(() => {
     fetchEmployees();
+    fetchLeaveRequests();
   }, []);
+
+  const handleLeaveAction = async (employeeId, index, action) => {
+    try {
+      const res = await axios.post(
+        `http://localhost:3001/api/admin/leave-requests/${employeeId}/${index}/${action}`,
+        {},
+        { withCredentials: true }
+      );
+      alert(res.data.message);
+      fetchEmployees();
+      fetchLeaveRequests();
+    } catch (err) {
+      console.error("Leave action failed:", err);
+      alert("Failed to process leave request.");
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -46,12 +77,21 @@ const AdminDashboard = () => {
   };
 
   const handleAddOrUpdateEmployee = async () => {
-    const isFormFilled = employeeData.employeeId && employeeData.name && employeeData.email && employeeData.dob && employeeData.joiningDate && employeeData.salary && employeeData.position;
+    const isFormFilled =
+      employeeData.employeeId &&
+      employeeData.name &&
+      employeeData.email &&
+      employeeData.dob &&
+      employeeData.joiningDate &&
+      employeeData.salary &&
+      employeeData.position &&
+      employeeData.totalLeave &&
+      employeeData.takenLeave;
+
     if (!isFormFilled) return alert("Please fill out all required fields.");
 
     try {
       if (editingEmployeeId) {
-        // If password is not blank, send it; else exclude it
         const updatedData = { ...employeeData };
         if (!updatedData.password) delete updatedData.password;
 
@@ -62,7 +102,6 @@ const AdminDashboard = () => {
         );
         alert("Employee updated.");
       } else {
-        // New employee requires password
         if (!employeeData.password) return alert("Password is required.");
         await axios.post("http://localhost:3001/api/employees", employeeData, {
           withCredentials: true,
@@ -88,6 +127,8 @@ const AdminDashboard = () => {
       joiningDate: "",
       salary: "",
       position: "",
+      totalLeave: "",
+      takenLeave: "",
     });
     setEditingEmployeeId(null);
   };
@@ -112,11 +153,13 @@ const AdminDashboard = () => {
       employeeId: emp.employeeId || "",
       name: emp.name,
       email: emp.email,
-      password: "", // password will only be set if admin wants to reset it
+      password: "",
       dob: emp.dob,
       joiningDate: emp.joiningDate,
       salary: emp.salary,
       position: emp.position,
+      totalLeave: emp.totalLeave || "",
+      takenLeave: emp.takenLeave || "",
     });
     setEditingEmployeeId(emp._id);
   };
@@ -157,58 +200,51 @@ const AdminDashboard = () => {
         {isSearching && <button onClick={handleClearSearch} className="clear-button">Clear</button>}
       </div>
 
+      {/* EMPLOYEE FORM */}
       <div className="form-grid">
-        <label>
-          Employee ID:
+        <label>Employee ID:
           <input type="text" name="employeeId" value={employeeData.employeeId} onChange={handleChange} />
         </label>
-        <label>
-          Name:
+        <label>Name:
           <input type="text" name="name" value={employeeData.name} onChange={handleChange} />
         </label>
-        <label>
-          Email:
+        <label>Email:
           <input type="email" name="email" value={employeeData.email} onChange={handleChange} />
         </label>
-        <label>
-          Password:
-          <input
-            type="password"
-            name="password"
-            placeholder={editingEmployeeId ? "Leave blank to keep existing" : ""}
-            value={employeeData.password}
-            onChange={handleChange}
-          />
+        <label>Password:
+          <input type="password" name="password" placeholder={editingEmployeeId ? "Leave blank to keep existing" : ""} value={employeeData.password} onChange={handleChange} />
         </label>
-        <label>
-          DOB:
+        <label>DOB:
           <input type="date" name="dob" value={employeeData.dob} onChange={handleChange} />
         </label>
-        <label>
-          Joining Date:
+        <label>Joining Date:
           <input type="date" name="joiningDate" value={employeeData.joiningDate} onChange={handleChange} />
         </label>
-        <label>
-          Salary:
+        <label>Salary:
           <input type="number" name="salary" value={employeeData.salary} onChange={handleChange} />
         </label>
-        <label>
-          Position:
+        <label>Position:
           <input type="text" name="position" value={employeeData.position} onChange={handleChange} />
         </label>
+        <label>Total Leave:
+          <input type="number" name="totalLeave" value={employeeData.totalLeave} onChange={handleChange} />
+        </label>
+        <label>Taken Leave:
+          <input type="number" name="takenLeave" value={employeeData.takenLeave} onChange={handleChange} />
+        </label>
+
         <button className="add-button" onClick={handleAddOrUpdateEmployee}>
           {editingEmployeeId ? "Update Employee" : "+ Add Employee"}
         </button>
       </div>
 
+      {/* EMPLOYEE TABLE */}
       {loading ? (
         <p>Loading employees...</p>
       ) : (
         <>
           {isSearching && (
-            <p>
-              Showing search results for: <strong>{searchQuery}</strong>
-            </p>
+            <p>Showing search results for: <strong>{searchQuery}</strong></p>
           )}
           <table>
             <thead>
@@ -220,6 +256,8 @@ const AdminDashboard = () => {
                 <th>Joining</th>
                 <th>Salary</th>
                 <th>Position</th>
+                <th>Total Leave</th>
+                <th>Taken Leave</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -233,18 +271,57 @@ const AdminDashboard = () => {
                   <td>{emp.joiningDate}</td>
                   <td>₹{emp.salary}</td>
                   <td>{emp.position}</td>
+                  <td>{emp.totalLeave || 0}</td>
+                  <td>{emp.takenLeave || 0}</td>
                   <td>
-                    <button onClick={() => handleEditEmployee(emp)} style={{ background: "#1890ff"}}>Edit</button>
-                    <br/>
+                    <button onClick={() => handleEditEmployee(emp)} style={{ background: "#1890ff" }}>Edit</button>
+                    <br />
                     <button onClick={() => handleDeleteEmployee(emp._id)} style={{ background: "#ff4d4f" }}>Delete</button>
                   </td>
                 </tr>
               )) : (
-                <tr><td colSpan="8">No employees found.</td></tr>
+                <tr><td colSpan="10">No employees found.</td></tr>
               )}
             </tbody>
           </table>
         </>
+      )}
+
+      {/* LEAVE REQUESTS */}
+      <h3>Pending Leave Requests</h3>
+      {leaveRequests.length === 0 ? (
+        <p>No pending leave requests.</p>
+      ) : (
+        <table>
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Email</th>
+              <th>Leave Index</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {leaveRequests.map((emp) =>
+              emp.leaveRequests
+                .map((lr, idx) => ({ ...lr, index: idx }))
+                .filter((lr) => lr.status === "Pending")
+                .map((lr) => (
+                  <tr key={`${emp._id}-${lr.index}`}>
+                    <td>{emp.name}</td>
+                    <td>{emp.email}</td>
+                    <td>{lr.index}</td>
+                    <td>{lr.status}</td>
+                    <td>
+                      <button onClick={() => handleLeaveAction(emp._id, lr.index, "approve")}>✅ Approve</button>
+                      <button onClick={() => handleLeaveAction(emp._id, lr.index, "reject")}>❌ Reject</button>
+                    </td>
+                  </tr>
+                ))
+            )}
+          </tbody>
+        </table>
       )}
     </div>
   );

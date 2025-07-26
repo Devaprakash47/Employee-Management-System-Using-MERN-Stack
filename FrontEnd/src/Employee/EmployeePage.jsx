@@ -5,6 +5,7 @@ function EmployeePage() {
   const [employee, setEmployee] = useState(null);
   const [leaveRequested, setLeaveRequested] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [leaveHistory, setLeaveHistory] = useState([]);
 
   useEffect(() => {
     const fetchEmployee = async () => {
@@ -12,8 +13,10 @@ function EmployeePage() {
         const res = await axios.get("http://localhost:3001/api/employee/profile", {
           withCredentials: true,
         });
+
         if (res.data.success) {
           setEmployee(res.data.employee);
+          setLeaveHistory(res.data.employee.leaveRequests || []);
         } else {
           alert("Unauthorized or session expired.");
         }
@@ -28,10 +31,25 @@ function EmployeePage() {
     fetchEmployee();
   }, []);
 
-  const handleLeaveRequest = () => {
-    setLeaveRequested(true);
-    alert("Leave request submitted!");
-    // Future: axios.post("/api/employee/request-leave")
+  const handleLeaveRequest = async () => {
+    try {
+      const res = await axios.post(
+        "http://localhost:3001/api/employee/request-leave",
+        {},
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        alert("Leave request submitted!");
+        setLeaveRequested(true);
+        setLeaveHistory((prev) => [...prev, res.data.newRequest]);
+      } else {
+        alert("Failed to request leave.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error submitting leave request.");
+    }
   };
 
   if (loading) return <p>Loading...</p>;
@@ -59,7 +77,7 @@ function EmployeePage() {
       </div>
 
       <div style={styles.section}>
-        <h3>Leave Request</h3>
+        <h3>Request Leave</h3>
         <button
           onClick={handleLeaveRequest}
           disabled={leaveRequested}
@@ -72,13 +90,28 @@ function EmployeePage() {
           {leaveRequested ? "Leave Requested" : "Request Leave"}
         </button>
       </div>
+
+      <div style={styles.section}>
+        <h3>Leave History</h3>
+        {leaveHistory.length === 0 ? (
+          <p>No leave requests found.</p>
+        ) : (
+          <ul>
+            {leaveHistory.map((leave, index) => (
+              <li key={index}>
+                {new Date(leave.date).toLocaleDateString()} — <strong>{leave.status}</strong>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }
 
 const styles = {
   container: {
-    maxWidth: "600px",
+    maxWidth: "700px",
     margin: "2rem auto",
     padding: "2rem",
     backgroundColor: "#f9f9f9",
