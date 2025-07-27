@@ -52,3 +52,13 @@ router.post("/request-leave", authMiddleware, async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+// GET /api/employees
+router.get("/", async (req, res) => {
+  try {
+    const employees = await Employee.find().select("-password"); // make sure all fields are included
+    res.json({ success: true, data: employees });
+  } catch (err) {
+    console.error("Fetch employees failed:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch employees" });
+  }
+});

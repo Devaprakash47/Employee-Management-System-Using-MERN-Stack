@@ -227,10 +227,10 @@ const AdminDashboard = () => {
           <input type="text" name="position" value={employeeData.position} onChange={handleChange} />
         </label>
         <label>Total Leave:
-          <input type="number" name="totalLeave" value={employeeData.totalLeave} onChange={handleChange} />
+          <input type="number" name="totalLeave" value={employeeData.totalLeaves} onChange={handleChange} />
         </label>
         <label>Taken Leave:
-          <input type="number" name="takenLeave" value={employeeData.takenLeave} onChange={handleChange} />
+          <input type="number" name="takenLeave" value={employeeData.leavesTaken} onChange={handleChange} />
         </label>
 
         <button className="add-button" onClick={handleAddOrUpdateEmployee}>
@@ -271,13 +271,25 @@ const AdminDashboard = () => {
                   <td>{emp.joiningDate}</td>
                   <td>₹{emp.salary}</td>
                   <td>{emp.position}</td>
-                  <td>{emp.totalLeave || 0}</td>
-                  <td>{emp.takenLeave || 0}</td>
-                  <td>
-                    <button onClick={() => handleEditEmployee(emp)} style={{ background: "#1890ff" }}>Edit</button>
-                    <br />
-                    <button onClick={() => handleDeleteEmployee(emp._id)} style={{ background: "#ff4d4f" }}>Delete</button>
-                  </td>
+                  <td>{emp.totalLeaves}</td>
+                  <td>{emp.leavesTaken}</td>
+                 <td>
+  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+    <button
+      onClick={() => handleEditEmployee(emp)}
+      style={{ background: "#1890ff", color: "white", padding: "6px", border: "none", borderRadius: "4px" }}
+    >
+      Edit
+    </button>
+    <button
+      onClick={() => handleDeleteEmployee(emp._id)}
+      style={{ background: "#ff4d4f", color: "white", padding: "6px", border: "none", borderRadius: "4px" }}
+    >
+      Delete
+    </button>
+  </div>
+</td>
+
                 </tr>
               )) : (
                 <tr><td colSpan="10">No employees found.</td></tr>
