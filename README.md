@@ -9,7 +9,10 @@ Built on the MERN stack (MongoDB, Express.js, React.js, Node.js), the EMS provid
 
 ## Early Screenshots
 ### EMS Entry Page : 
-![EMS Entry](https://github.com/user-attachments/assets/75dc7a8d-d816-4597-b89c-6ade8998afd9)
+![EMS Entry]<video width="100%" controls>
+  <source src="https://github.com/Devaprakash47/Employee-Management-System-Using-MERN-Stack/blob/6abbe91e6bee49dc9e767d02e1fd8cba24486774/FrontEnd/src/assets/welcome.mp4" type="video/mp4">
+</video>
+
 ### EMS HR Sign Up : 
 ![EMS HR-Sign up](https://github.com/user-attachments/assets/3f576691-78fb-4e66-b409-bd9ed9a1eb2c)
 ### EMS HR Login : 
