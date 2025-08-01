@@ -22,60 +22,62 @@ A full-featured **Employee Management System** built using the **MERN Stack** (M
 |-----------------|------------------|------------------|------------------|
 | React.js (Hooks) | Node.js, Express | MongoDB (Mongoose) | JWT & Cookies |
 
-## 📁 Folder Structure
-
-├── client/ # React frontend
-│ ├── components/
-│ └── pages/
-├── server/ # Express backend
-│ ├── models/
-│ ├── routes/
-│ └── controllers/
-└── README.md
-
-bash
-Copy
-Edit
 
 ## ⚙️ Installation
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/employee-management-system.git
-cd employee-management-system
+git clone https://github.com/yourusername/employee-management-system.git](https://github.com/Devaprakash47/Employee-Management-System-Using-MERN-Stack.git
 ```
 2. Install dependencies
 Backend
-bash
-Copy
-Edit
+```bash
 cd backend
 npm install
+```
 Frontend
-bash
-Copy
-Edit
+```bash
 cd frontend
 npm install
-3. Environment Configuration
+```
+4. Environment Configuration
 Create a .env file inside the backend folder with the following variables:
-
-env
-Copy
-Edit
+```bash
 PORT=3001
 MONGO_URI=mongodb://localhost:27017/ems
 JWT_SECRET=your_jwt_secret_key
+```
 4. Run the application
 Start the backend server
-bash
-Copy
-Edit
+```bash
 cd backend
 npm start
+```
 Start the frontend app
-bash
-Copy
-Edit
+```bash
+
 cd frontend
-npm start
+npm run dev
+```
+📁 Folder Structure
+```bash
+
+Employee-Management-System/
+│
+├── backend/           # Express.js + MongoDB + JWT API
+│   ├── models/
+│   ├── routes/
+│   ├── controllers/
+│   └── .env
+│
+└── frontend/          # React.js (Vite) Frontend
+    ├── components/
+    ├── pages/
+    └── App.jsx
+```
+## 📬 Contact
+
+**Devaprakash S**  
+📧 Email: [deva27997@gmail.com](mailto:deva27997@gmail.com)  
+🔗 LinkedIn: [linkedin.com/in/devaprakash47](https://www.linkedin.com/in/devaprakash47)
+
