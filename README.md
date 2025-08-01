@@ -39,54 +39,43 @@ Edit
 
 ## ⚙️ Installation
 
-### 1. Clone the repo
+### 1. Clone the repository
 ```bash
 git clone https://github.com/yourusername/employee-management-system.git
 cd employee-management-system
+```
 2. Install dependencies
 Backend
 bash
 Copy
 Edit
-cd server
+cd backend
 npm install
 Frontend
 bash
 Copy
 Edit
-cd client
+cd frontend
 npm install
-3. Create .env file in /server with:
+3. Environment Configuration
+Create a .env file inside the backend folder with the following variables:
+
 env
 Copy
 Edit
 PORT=3001
 MONGO_URI=mongodb://localhost:27017/ems
 JWT_SECRET=your_jwt_secret_key
-4. Run the app
-Start backend
+4. Run the application
+Start the backend server
 bash
 Copy
 Edit
-cd server
+cd backend
 npm start
-Start frontend
+Start the frontend app
 bash
 Copy
 Edit
-cd client
+cd frontend
 npm start
-📸 Screenshots
-Admin Dashboard	Employee Dashboard
-
-📌 To Do
-Add email notifications for approved/rejected leaves
-
-Integrate PDF salary slips
-
-Improve UI with Tailwind/Bootstrap
-
-👨‍🔧 Author
-Devaprakash S
-Email: devaprakash@example.com
-LinkedIn: linkedin.com/in/devaprakash47
