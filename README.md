@@ -77,7 +77,7 @@ Employee-Management-System/
 ```
 ## 📬 Contact
 
-**Devaprakash S**  
+**Devaprakash S**
 📧 Email: [deva27997@gmail.com](mailto:deva27997@gmail.com)  
 🔗 LinkedIn: [linkedin.com/in/devaprakash47](https://www.linkedin.com/in/devaprakash47)
 
