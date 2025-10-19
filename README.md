@@ -20,7 +20,7 @@ A full-featured **Employee Management System** built using the **MERN Stack** (M
 
 | Frontend        | Backend         | Database        | Authentication |
 |-----------------|------------------|------------------|------------------|
-| React.js (Hooks) | Node.js, Express | MongoDB (Mongoose) | JWT & Cookies |
+| React.js  | Node.js, Express | MongoDB (Mongoose) | JWT & Cookies |
 
 
 ## ⚙️ Installation
